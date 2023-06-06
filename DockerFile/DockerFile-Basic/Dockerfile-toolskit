@@ -1,0 +1,17 @@
+FROM debian:bullseye-20221219-slim
+#####################################  Set Local Repo  ###################################
+RUN echo "deb http://192.168.7.250:8082/artifactory/debian-remote bullseye main\ndeb http://192.168.7.250:8082/artifactory/debian-remote bullseye-updates main" > /etc/apt/sources.list
+#####################################    SSH Config    ###################################
+COPY ssh /root/.ssh
+RUN \
+  chmod 400 /root/.ssh/id_rsa
+#####################################   Install Tools  ###################################
+RUN \
+  apt update && \
+  apt install -y rsync ssh maven openjdk-11-jdk &&\
+  rm -rf /var/lib/apt/lists/*
+
+#################################   Discription / Command  ###############################
+# sudo docker build -t toolskit:v2 -f Dockerfile-toolskit .
+# sudo docker tag toolskit:v2 docker.localhost:8082/docker/toolskit:v2
+# sudo docker push docker.localhost:8082/docker/toolskit:v2

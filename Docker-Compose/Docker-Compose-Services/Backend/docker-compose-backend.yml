@@ -1,0 +1,32 @@
+version: "2.4"
+
+services:
+############### payment-solution ###############
+  payment-solution:
+    container_name: payment-solution
+    hostname: payment-solution
+    image: registry.local:5002/backend/java_run:11.0.11-jre-slim-buster
+    restart: on-failure
+    ports:
+      - 11100:8089
+    # environment:
+    #   - JAVA_OPTS=-Xms700m -Xmx700m
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /srv/backend/payment-solution:/opt/routaa
+      #statics
+      #- /srv/Routaa_statics/map-engine:/opt/routaa/map-helm
+    cpus: 8
+    mem_limit: 1g
+    healthcheck:
+      test: curl -s http://localhost:11100/api/pub/status | grep Success
+      #      test: curl -s http://localhost:8080/api/pub/status | grep Success || kill -15 `pgrep java`
+      interval: 90s
+      timeout: 3s
+      retries: 3
+
+
+networks:
+  default:
+    name: product

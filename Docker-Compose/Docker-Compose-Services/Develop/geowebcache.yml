@@ -1,0 +1,68 @@
+# 7.17
+version: "2.4"
+services:
+  geowebcache:
+   container_name: geowebcache
+   hostname: geowebcache
+   #image: tomcat:8.5.35-jre10
+   image: tomcat:8.5.72-jre8-temurin-focal
+   restart: unless-stopped
+   ports:
+   - 8081:8080
+   - 5704:5704
+   environment:
+   - JAVA_OPTS=-Xms2g -Xmx4g
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+   - /srv/geowebcache/webapps/:/usr/local/tomcat/webapps/
+   - /srv/geowebcache/temp:/usr/local/tomcat/temp/
+   - /srv/geowebcache/conf/:/usr/local/tomcat/conf  
+     #- /srv/geowebcache/temp/geowebcache/diskquota_page_store1:/usr/local/tomcat/temp/geowebcache/diskquota_page_store
+     #- confw:/usr/local/tomcat/conf
+   cpus: 3
+   mem_limit: 6g
+   #environment:
+   #- CATALINA_OPTS='-DGWC_DISKQUOTA_DISABLED=true'
+   healthcheck:
+     test: ["CMD", "curl -I 127.0.0.1:8081/geowebcache/ 2>/dev/null  | head -n 1 | cut -d$' ' -f2"]
+     interval: 30s
+     timeout: 3s
+     retries: 2
+     start_period: 60s
+
+# Disable Node1 |  2023 02 January
+  # geowebcache2:
+  #  container_name: geowebcache2
+  #  hostname: geowebcache2
+  #  #image: tomcat:8.5.35-jre10
+  #  image: tomcat:8.5.72-jre8-temurin-focal
+  #  restart: unless-stopped
+  #  ports:
+  #  - 8082:8080
+  #  - 5702:5702  
+  #  environment:
+  #  - JAVA_OPTS=-Xms1g -Xmx1g
+  #  volumes:
+  #  - /etc/localtime:/etc/localtime:ro
+  #  - /etc/timezone:/etc/timezone:ro
+  #  - /srv/geowebcache/webapps2/:/usr/local/tomcat/webapps/
+  #  - /srv/geowebcache/temp:/usr/local/tomcat/temp/
+  #  - /srv/geowebcache/conf/:/usr/local/tomcat/conf  
+  #    #- /srv/geowebcache/webapps/geowebcache/WEB-INF/geowebcache-distributed2.xml:/usr/local/tomcat/webapps/geowebcache/WEB-INF/geowebcache-distributed.xml
+  #    #- /srv/geowebcache/temp/geowebcache/diskquota_page_store1/:/usr/local/tomcat/temp/geowebcache/diskquota_page_store
+  #    #- confw:/usr/local/tomcat/conf
+  #  cpus: 3
+  #  mem_limit: 3g   
+  #  #environment:
+  #  #- CATALINA_OPTS='-DGWC_DISKQUOTA_DISABLED=true'
+volumes:
+  confw:
+    name: confw
+    driver_opts:
+          type: none
+          device: /srv/geowebcache/conf/
+          o: bind
+networks:
+  default:
+    name: product 

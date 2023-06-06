@@ -1,0 +1,57 @@
+# sudo docker inspect --format "{{json .State.Health }}" geowebcache | jq
+version: '2.1'
+services:
+  php:
+    tty: true
+    build:
+      context: .
+      dockerfile: tests/Docker/Dockerfile-PHP
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://Administrator:password@localhost:8091/pools/default/buckets/default"]
+      interval: 1s
+      timeout: 3s
+      retries: 60
+
+  mysql:
+    image: mysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_ROOT_PASSWORD=
+      - MYSQL_DATABASE=cache
+    healthcheck:
+      test: ["CMD", "mysql" ,"-h", "mysql", "-P", "3306", "-u", "root", "-e", "SELECT 1", "cache"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  postgresql:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=cache
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  db:
+    image: mariadb:10
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: database
+    healthcheck:
+      test: ["CMD", "mysql", "--user=user", "--password=password", "--execute='SELECT 1'", "--host=127.0.0.1", "--port=3306"]
+      interval: 1s
+      retries: 30
+
+
+  redis:
+    image: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30

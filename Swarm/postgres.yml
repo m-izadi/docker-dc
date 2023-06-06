@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  postgres:
+    hostname: rabbitmq
+    # container_name: rabbit-1
+    image: postgres:12.13-alpine3.17
+    restart: always
+    volumes:
+      - "dbnfs:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data/db/
+    deploy:
+      replicas: 1
+      # placement:
+      #   constraints:
+      #     - "node.labels.backend==rabbitmq"
+      #     - "node.role==worker"
+      #   max_replicas_per_node: 1
+      #   update_config:
+      #     parallelism: 2
+      #     delay: 10s
+      # restart_policy:
+      #   condition: on-failure
+  # healthcheck:
+  #   test: ["CMD", "curl", "-f", "http://localhost"]
+  #   interval: 1m30s
+  #   timeout: 10s
+  #   retries: 3
+  #   start_period: 40s
+    networks:
+      - postgres
+
+
+
+
+volumes:
+  dbnfs:
+    driver: localhost
+    driver_opts:
+      type: nfs
+      o: addr=192.168.7.245,rw
+      device: ":/srv/nfs/db/*"
+
+
+# networks:
+#   prod:
+#     driver: overlay
+#     #    external: true
+#     name: prod
+
+
+networks:
+  postgres:
+    ipam:
+      config:
+        - subnet: 192.168.20.0/24

@@ -1,0 +1,9 @@
+# Build Orgin Container | Used by CI Container (GitLabRunner) | /srv/data/dockerfile/Dockerfile-ms_geoserver_mgm
+FROM python:3.8-slim-bullseye
+MAINTAINER MohammadReza Izadi <mohammadreza.i1997@gmail.com>
+##################################### Set Local Repo  ###################################
+RUN echo "[global]\nindex-url = http://repo:AP3XnGQutY1qEhwhfNuyroBqMNZ@192.168.7.250:8081/artifactory/api/pypi/pip-remote/simple\ntrusted-host = 192.168.7.250" > /etc/pip.conf
+#########################################################################################
+WORKDIR /opt
+COPY . .
+RUN pip install -r /opt/ms_geoserver_mgm/requirements.txt

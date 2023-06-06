@@ -1,0 +1,46 @@
+version: '2.4'
+services:
+#==== Backend ========================================
+  payment-solution-deploy:
+    container_name: payment-solution-deploy
+    hostname: payment-solution-deploy
+    networks:
+      - prod-overlay
+    image: registry.local:5002/backend/java_run:11.0.11-jre-slim-buster
+    restart: unless-stopped
+    ports:
+      - 21100:8089
+    environment:
+      - JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /mnt/share/back/payment-solution:/opt/routaa
+      #statics
+      - /mnt/share/Routaa/payment-solution_static:/opt/Routaa
+#    depends_on:
+#      - config-server
+    cpus: 12
+    mem_limit: 7g
+    #    healthcheck:
+    # test: ["CMD", "curl", "-f", "http://localhost:11100/api/pub/status"]
+    #  interval: 30s
+    #  timeout: 3s
+    #  retries: 2
+    #  start_period: 60s
+    extra_hosts:
+      - "eureka1:192.168.19.11"
+      - "eureka2:192.168.19.12"
+      - "eureka3:192.168.19.13"
+      - "config-server1:192.168.19.11"
+      - "config-server1-deploy:192.168.19.11"
+      - "config-server2:192.168.19.12"
+      - "config-server2-deploy:192.168.19.12"
+      - "config-server3:192.168.19.13"
+      - "config-server3-deploy:192.168.19.13"
+
+
+networks:
+  prod-overlay:
+    external: true
+    name: prod-overlay

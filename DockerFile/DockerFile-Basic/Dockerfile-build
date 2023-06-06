@@ -1,0 +1,5 @@
+# Build Orgin Container | Used by CI Container (GitLabRunner)
+FROM python:3.8-slim-bullseye
+WORKDIR /opt
+COPY . .
+#RUN pip install -r /data/requirements.txt

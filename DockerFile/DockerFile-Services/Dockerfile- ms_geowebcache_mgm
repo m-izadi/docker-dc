@@ -1,0 +1,24 @@
+# Build Orgin Container | Used by CI Container (GitLabRunner) | data/dockerfile/Dockerfile-ms_geowebcache_mgm
+FROM python:3.8-slim-bullseye
+##################################### Set Local Repo  ###################################
+RUN echo "deb http://192.168.7.250:8082/artifactory/debian-remote bullseye main\ndeb http://192.168.7.250:8082/artifactory/debian-remote bullseye-updates main" > /etc/apt/sources.list
+RUN echo "[global]\nindex-url = http://repo:AP3MzNo7qbhyg8CxjZHNQwsPqVzna3ZhV9mrx2@192.168.7.250:8081/artifactory/api/pypi/pip-virtual/simple\ntrusted-host = 192.168.7.250" > /etc/pip.conf
+#########################################################################################
+MAINTAINER MohammadReza Izadi <mohammadreza.i1997@gmail.com>
+RUN useradd -ms /bin/bash dev
+WORKDIR /opt
+COPY --chown=dev:dev . .
+RUN \
+    apt update 2>/dev/null && \
+    apt install -y libpq-dev libpq5 libpq-dev gdal-bin libgdal-dev aptitude 2>/dev/null && \
+    aptitude install libgdal-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+USER dev
+ENV PATH="/home/dev/.local/bin:${PATH}"
+
+RUN \
+    pip install --no-cache-dir -r /opt/ms_geowebcache_mgm/requirements.txt
+
+CMD ["python", "/opt/ms_geowebcache_mgm/manage.py", "runserver", "0.0.0.0:8000"]
+EXPOSE 8060

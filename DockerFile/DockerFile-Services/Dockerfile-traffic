@@ -1,0 +1,6 @@
+# Build Orgin Container | Used by CI Container (GitLabRunner) | /srv/data/dockerfile/Dockerfile-ms_business_poi_mgm
+FROM python:3.8-slim-bullseye
+MAINTAINER MohammadReza Izadi <mohammadreza.i1997@gmail.com>
+WORKDIR /opt
+COPY . .
+RUN pip install -r /opt/traffic/requirements.txt

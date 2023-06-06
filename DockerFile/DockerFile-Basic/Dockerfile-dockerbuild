@@ -1,0 +1,29 @@
+FROM debian:bullseye-20221219-slim
+MAINTAINER MohammadReza Izadi <mohammadreza.i1997@gmail.com>
+##################################### Set Local Repo  ###################################
+RUN echo "deb http://192.168.7.250:8082/artifactory/debian-remote bullseye main\ndeb http://192.168.7.250:8082/artifactory/debian-remote bullseye-updates main" > /etc/apt/sources.list
+
+##################################### Install bzip2(for compress image) ###################################
+RUN \
+  apt update && apt install -y \
+  bzip2
+#  && rm -rf /var/lib/apt/lists/*
+
+##################################### Install Docker #####################################
+RUN apt-get install -y \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+RUN apt update 2>/dev/null && apt-get install -y \
+    docker-ce \
+    docker-ce-cli \
+    containerd.io \
+#    docker-compose-plugin
+    && rm -rf /var/lib/apt/lists/*
+
+##########################################################################################

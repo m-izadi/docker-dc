@@ -1,0 +1,197 @@
+# On Node3 192.168.178.35
+version: "2.4"
+services:
+  eureka:
+    container_name: eureka
+    hostname: eureka3
+    image: registry.local:5002/backend/java_run:8u222-jre-slim-buster
+    restart: unless-stopped
+    networks:
+      - prod-overlay
+    ports:
+      - 192.168.19.13:8761:8761
+    environment:
+      - JAVA_OPTS=-Xms265m -Xmx265m -Dspring.profiles.active=peer3
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /mnt/share/back/eureka:/opt/eureka
+    cpus: 8
+    mem_limit: 800m
+    extra_hosts:
+      - "eureka1:192.168.19.11"
+      - "eureka2:192.168.19.12"
+      - "eureka3:192.168.19.13"
+
+  config-server:
+    container_name: config-server
+    hostname: config-server3
+    image: registry.local:5002/backend/java_run:8u222-jre-slim-buster
+    restart: unless-stopped
+    networks:
+      - prod-overlay
+    ports:
+      - 8888:8888
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx256m
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /mnt/share/back/config-server:/opt/config-server
+        #depends_on:
+        #- eureka
+    cpus: 4
+    mem_limit: 400m
+
+  map-engine3:
+    container_name: map-engine3
+    hostname: map-engine3
+    image: registry.local:5002/backend/java_run:11.0.11-jre-slim-buster
+    restart: unless-stopped
+    networks:
+      - prod-overlay
+    ports:
+      - 8086:8086
+    environment:
+      - JAVA_OPTS=-Xms700m -Xmx700m
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /mnt/share/back/map-engine:/opt/routaa
+      #statics
+      - /mnt/share/Routaa/map-engine:/opt/routaa/map-engine
+    cpus: 8
+    mem_limit: 1g
+    healthcheck:
+      test: curl -s http://localhost:8086/api/pub/status | grep Success
+      #      test: curl -s http://localhost:8080/api/pub/status | grep Success || kill -15 `pgrep java`
+      interval: 90s
+      timeout: 3s
+      retries: 3
+
+  map-engine-async3:
+    container_name: map-engine-async3
+    hostname: map-engine-async3
+    image: registry.local:5002/backend/java_run:11.0.11-jre-slim-buster
+    restart: unless-stopped
+    networks:
+      - prod-overlay
+    ports:
+      - 8088:8088
+    environment:
+      - JAVA_OPTS=-Xms700m -Xmx700m
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /mnt/share/back/map-engine-async/bin/:/opt/routaa/bin
+      - /mnt/share/back/map-engine:/opt/routaa
+      #statics
+      #- /srv/Routaa_statics/map-engine:/opt/routaa/map-helm
+      #    cpus: 8
+    mem_limit: 1g
+    healthcheck:
+      test: curl -s http://localhost:8088/api/pub/status | grep Success
+      #      test: curl -s http://localhost:8080/api/pub/status | grep Success || kill -15 `pgrep java`
+      interval: 90s
+      timeout: 3s
+      retries: 3
+
+  business3:
+    container_name: business3
+    hostname: business3
+    image: registry.local:5002/backend/java_run:11.0.11-jre-slim-buster
+    networks:
+      - prod-overlay
+    restart: unless-stopped
+    ports:
+      - 8082:8082
+    environment:
+      - JAVA_OPTS=-Xms2g -Xmx2g
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /mnt/share/back/business:/opt/routaa
+      #statics
+      - /mnt/share/Routaa/business:/opt/routaa/business
+    cpus: 8
+    mem_limit: 2.5g
+    healthcheck:
+      test: curl -s http://localhost:8082/api/pub/status | grep Success
+      #      test: curl -s http://localhost:8080/api/pub/status | grep Success || kill -15 `pgrep java`
+      interval: 90s
+      timeout: 3s
+      retries: 3
+
+  payment-solution3:
+    container_name: payment-solution3
+    hostname: payment-solution3
+    image: registry.local:5002/backend/java_run:11.0.11-jre-slim-buster
+    restart: unless-stopped
+    networks:
+      - prod-overlay
+    ports:
+      - 11100:8089
+    environment:
+      - JAVA_OPTS=-Xms2g -Xmx2g
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /mnt/share/back/payment-solution:/opt/routaa
+      #statics
+      - /mnt/share/Routaa/payment-solution:/opt/routaa/payment-solution
+    cpus: 8
+    mem_limit: 2.5g
+    healthcheck:
+      test: curl -s http://localhost:11100/api/pub/status | grep Success
+      interval: 90s
+      timeout: 3s
+      retries: 3
+
+  map-helm3:
+    container_name: map-helm3
+    hostname: map-helm3
+    image: registry.local:5002/backend/java_run:11.0.11-jre-slim-buster
+    networks:
+      - prod-overlay
+    restart: unless-stopped
+    ports:
+      - 8085:8085
+    environment:
+      - JAVA_OPTS=-Xms1g -Xmx1g
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /mnt/share/back/map-helm:/opt/routaa
+      #statics
+      - /mnt/share/Routaa/map-helm:/opt/routaa/map-helm
+    cpus: 8
+    mem_limit: 1.5g
+    healthcheck:
+      test: curl -s http://localhost:8085/api/pub/status | grep Success
+      #      test: curl -s http://localhost:8080/api/pub/status | grep Success || kill -15 `pgrep java`
+      interval: 90s
+      timeout: 3s
+      retries: 3
+
+  matin-website:
+    container_name: matin-website
+    hostname: matin-website
+    image: registry.local:5002/backend/java_run:11.0.11-jre-slim-buster
+    restart: on-failure
+    ports:
+      - 8083:8083
+    environment:
+      - JAVA_OPTS=-Xms2g -Xmx2g
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /srv/backend/matin-website:/opt/routaa
+      #statics
+      - /srv/Routaa_statics/matin-website:/opt/routaa/matin-website
+    cpus: 8
+    mem_limit: 2g
+
+networks:
+  prod-overlay:
+    external: true
+    name: prod-overlay

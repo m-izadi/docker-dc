@@ -1,0 +1,12 @@
+# Build Orgin Container | Used by CI Container (GitLabRunner) | /srv/data/dockerfile/Dockerfile-ms_place_mgm
+FROM python:3.8-slim-bullseye
+MAINTAINER MohammadReza Izadi <mohammadreza.i1997@gmail.com>
+WORKDIR /opt
+COPY . .
+RUN \
+  apt update && \
+  apt install -y libgdal-dev make build-essential libsqlite3-dev zlib1g-dev \
+  rm -rf /var/lib/apt/lists/* \
+  && cd tippecanoe \
+  && make -j \
+  &&  make install

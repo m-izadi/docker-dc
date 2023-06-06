@@ -1,0 +1,224 @@
+version: "2.4"
+services:
+################################################################ osm-generator ################################################################
+
+  osm-generator:
+   container_name:  osm-generator
+   hostname:  osm-generator
+   #image: python:3.8.5-slim
+   #   image: python:3.10.8-osm-generator
+   image: osm-generator:v1
+   restart: unless-stopped
+   ports:
+   - 8051:8000
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro            
+   - /srv/osm_generator/ssh:/root/.ssh/
+   - /srv/osm_generator/road_export/export_data:/opt/osm_generator/road_export/export_data
+   - /srv/osm_generator/osm_export/export_data:/opt/osm_generator/osm_export/export_data
+     #   - /srv/osm_generator/hosts:/etc/hosts
+   networks:
+   - prod-overlay
+   command: /bin/sh -c "python /opt/osm_generator/manage.py runserver 0.0.0.0:8000"
+   cpus: 10
+   mem_limit: 12g
+   #"pip3 install -r /opt/requirements.txt &&
+
+################################################################ ms_business_poi_mgm ################################################################
+
+  ms_business_poi_mgm:
+   container_name:  ms_business_poi_mgm
+   hostname:  ms-business-poi-mgm
+   image: ms_business_poi_mgm:v1
+   restart: unless-stopped
+   ports:
+   - 8053:8000
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+     #   - /srv/ms_business_poi_mgm/etc/hosts:/etc/hosts:ro
+     #   - /srv/osm_generator/osm_export/export_data:/opt/osm_generator/osm_export/export_data
+     #   - /srv/osm_generator/road_export/export_data:/opt/osm_generator/road_export/export_data
+     #   - /srv/osm_generator/hosts:/etc/hosts
+   networks:
+   - prod-overlay
+
+     #   command: /bin/sh -c "echo 192.168.19.11 kafka >> /etc/hosts && python /opt/ms_business_poi_mgm/manage.py runserver 0.0.0.0:8000"
+#   command: >
+#      /bin/sh -c "echo 192.168.19.11 kafka >> /etc/hosts &&
+                  #python /opt/ms_business_poi_mgm/manage.py runserver 0.0.0.0:8000"
+
+   entrypoint: ["/bin/sh","-c"]
+   command:
+   - |
+      echo 192.168.19.11 kafka >> /etc/hosts
+      python /opt/ms_business_poi_mgm/manage.py runserver 0.0.0.0:8000
+
+                  
+################################################################ ms_place_mgm ################################################################
+
+  ms_place_mgm:
+   container_name:  ms_place_mgm
+   hostname:  ms_place_mgm
+   image: ms_place_mgm:v1
+   restart: unless-stopped
+   ports:
+   - 8054:8000
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+   networks:
+   - prod-overlay
+   command: /bin/sh -c "python /opt/ms_place_mgm/manage.py runserver 0.0.0.0:8000"
+   #cpus: 6
+   #mem_limit: 7g
+   #"pip3 install -r /opt/requirements.txt &&
+
+################################################################ ms_sync_services_mgm ################################################################
+
+  ms_sync_services_mgm:
+   container_name:  ms_sync_services_mgm
+   hostname:  ms_sync_services_mgm
+   image: ms_sync_services_mgm:v1
+   restart: unless-stopped
+   ports:
+   - 8056:8000
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+     #   - /srv/osm_generator/osm_export/export_data:/opt/osm_generator/osm_export/export_data
+     #   - /srv/osm_generator/road_export/export_data:/opt/osm_generator/road_export/export_data
+     #   - /srv/osm_generator/hosts:/etc/hosts
+   networks:
+   - prod-overlay
+#   command: echo 192.168.7.16 kafka >> /etc/hosts
+   command: /bin/sh -c "python /opt/ms_sync_services_mgm/manage.py runserver 0.0.0.0:8000"
+   #cpus: 6
+   #mem_limit: 7g
+   #"pip3 install -r /opt/requirements.txt &&
+
+
+################################################################ ms_admin_division_mgm ################################################################
+
+  ms_admin_division_mgm:
+   container_name:  ms_admin_division_mgm
+   hostname:  ms_admin_division_mgm
+   image: ms_admin_division_mgm:v1
+   restart: unless-stopped
+   ports:
+   - 8057:8000
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+     #   - /srv/osm_generator/osm_export/export_data:/opt/osm_generator/osm_export/export_data
+     #   - /srv/osm_generator/road_export/export_data:/opt/osm_generator/road_export/export_data
+     #   - /srv/osm_generator/hosts:/etc/hosts
+   networks:
+   - prod-overlay
+#   command: echo 192.168.7.16 kafka >> /etc/hosts
+   command: /bin/sh -c "python /opt/ms_admin_division_mgm/manage.py runserver 0.0.0.0:8000"
+   #cpus: 6
+   #mem_limit: 7g
+   #"pip3 install -r /opt/requirements.txt &&
+
+
+################################################################ crawler ################################################################
+
+  crawler:
+   container_name:  crawler
+   hostname:  crawler
+   image: crawler:v1
+   restart: unless-stopped
+   ports:
+   - 8060:8000
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+     #   - /srv/osm_generator/osm_export/export_data:/opt/osm_generator/osm_export/export_data
+     #   - /srv/osm_generator/road_export/export_data:/opt/osm_generator/road_export/export_data
+     #   - /srv/osm_generator/hosts:/etc/hosts
+   networks:
+   - prod-overlay
+#   command: echo 192.168.7.16 kafka >> /etc/hosts
+   command: /bin/sh -c "python /opt/crawler/manage.py runserver 0.0.0.0:8000"
+   #cpus: 6
+   #mem_limit: 7g
+   #"pip3 install -r /opt/requirements.txt &&
+
+
+################################################################ traffic ################################################################
+
+  traffic:
+   container_name:  traffic
+   hostname:  traffic
+   image: traffic:v1
+   restart: unless-stopped
+   ports:
+   - 8065:8000
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+     #   - /srv/osm_generator/osm_export/export_data:/opt/osm_generator/osm_export/export_data
+     #   - /srv/osm_generator/road_export/export_data:/opt/osm_generator/road_export/export_data
+     #   - /srv/osm_generator/hosts:/etc/hosts
+   networks:
+   - prod-overlay
+#   command: echo 192.168.7.16 kafka >> /etc/hosts
+   command: /bin/sh -c "python /opt/traffic/manage.py runserver 0.0.0.0:8000"
+   #cpus: 6
+   #mem_limit: 7g
+   #"pip3 install -r /opt/requirements.txt &&
+
+################################################################ ms_geoserver_mgm ################################################################
+
+  ms_geoserver_mgm:
+   container_name:  ms_geoserver_mgm
+   hostname:  ms_geoserver_mgm
+   image: ms_geoserver_mgm:v1
+   restart: unless-stopped
+   ports:
+   - 8070:8000
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+     #   - /srv/osm_generator/osm_export/export_data:/opt/osm_generator/osm_export/export_data
+     #   - /srv/osm_generator/road_export/export_data:/opt/osm_generator/road_export/export_data
+     #   - /srv/osm_generator/hosts:/etc/hosts
+   networks:
+   - prod-overlay
+#   command: echo 192.168.7.16 kafka >> /etc/hosts
+   command: /bin/sh -c "python /opt/ms_geoserver_mgm/manage.py runserver 0.0.0.0:8000"
+   #cpus: 6
+   #mem_limit: 7g
+   #"pip3 install -r /opt/requirements.txt &&
+
+################################################################ ms_geowebcache_mgm ################################################################
+
+  ms_geowebcache_mgm:
+   container_name:  ms_geowebcache_mgm
+   hostname:  ms_geowebcache_mgm
+   image: ms_geowebcache_mgm:v1
+   restart: unless-stopped
+   ports:
+   - 8075:8000
+   volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+     #   - /srv/osm_generator/osm_export/export_data:/opt/osm_generator/osm_export/export_data
+     #   - /srv/osm_generator/road_export/export_data:/opt/osm_generator/road_export/export_data
+     #   - /srv/osm_generator/hosts:/etc/hosts
+   networks:
+   - prod-overlay
+#   command: echo 192.168.7.16 kafka >> /etc/hosts
+   command: /bin/sh -c "python /opt/ms_geowebcache_mgm/manage.py runserver 0.0.0.0:8000"
+   #cpus: 6
+   #mem_limit: 7g
+   #"pip3 install -r /opt/requirements.txt &&
+
+###########################################################################################################################################
+networks:
+  prod-overlay:
+    external: true
+    name: prod-overlay
+

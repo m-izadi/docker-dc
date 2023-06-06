@@ -1,0 +1,14 @@
+# Build Orgin Container | Used by CI Container (GitLabRunner) | /srv/data/dockerfile/Dockerfile-ms_place_mgm
+FROM python:3.8-slim-bullseye
+MAINTAINER MohammadReza Izadi <mohammadreza.i1997@gmail.com>
+##################################### Set Local Repo  ###################################
+RUN echo "deb http://192.168.7.250:8082/artifactory/debian-remote bullseye main\ndeb http://192.168.7.250:8082/artifactory/debian-remote bullseye-updates main" > /etc/apt/sources.list
+RUN echo "[global]\nindex-url = http://repo:AP3XnGQutY1qEhwhfNuyroBqMNZ@192.168.7.250:8081/artifactory/api/pypi/pip-remote/simple\ntrusted-host = 192.168.7.250" > /etc/pip.conf
+#########################################################################################
+WORKDIR /opt
+COPY . .
+RUN \
+  apt update && \
+  apt install -y libgdal-dev &&\
+  rm -rf /var/lib/apt/lists/*
+RUN pip install -r /opt/ms_place_mgm/requirements.txt
